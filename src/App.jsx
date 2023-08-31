@@ -58,13 +58,13 @@ const sortProducts = (prevProds, sortState, sortCoefficient) => {
     case 'ID': return copyProds.sort((a, b) => (a.id - b.id) * sortCoefficient);
     case 'Product': return copyProds
       .sort((a, b) => (a.productName
-        .localCompare(b.productName)) * sortCoefficient);
+        .localeCompare(b.productName)) * sortCoefficient);
     case 'Category': return copyProds
       .sort((a, b) => (a.title
-        .localCompare(b.title)) * sortCoefficient);
+        .localeCompare(b.title)) * sortCoefficient);
     case 'User': return copyProds
       .sort((a, b) => (a.userName
-        .localCompare(b.userName)) * sortCoefficient);
+        .localeCompare(b.userName)) * sortCoefficient);
 
     default: throw new Error('Error');
   }
@@ -82,7 +82,7 @@ const getSortValue = (currentCoeff) => {
   return 0;
 };
 
-// const sortedFields = ['ID', 'Product', 'Category', 'User'];
+const sortFields = ['ID', 'Product', 'Category', 'User'];
 
 export const App = () => {
   const [userFilter, setUserFilter] = useState('');
@@ -230,140 +230,42 @@ export const App = () => {
             >
               <thead>
                 <tr>
-                  <th
-                    onClick={() => {
-                      if (sortState === 'ID') {
-                        setSortCoefficient(getSortValue(sortCoefficient));
+                  {sortFields.map(el => (
+                    <th
+                      key={el}
+                      onClick={() => {
+                        if (sortState === el) {
+                          setSortCoefficient(getSortValue(sortCoefficient));
 
-                        return;
-                      }
+                          return;
+                        }
 
-                      setSortState('ID');
-                      setSortCoefficient(1);
-                    }}
-                  >
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      ID
+                        setSortState(el);
+                        setSortCoefficient(1);
+                      }}
+                    >
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        {el}
 
-                      <a href="#/">
-                        <span className="icon">
-                          <i
-                            data-cy="SortIcon"
-                            className={cn('fas', {
-                              'fa-sort': sortState !== 'ID'
-                              || (sortState === 'ID'
-                                && sortCoefficient === 0),
-                              'fa-sort-down': sortState === 'ID'
-                                && sortCoefficient === -1,
-                              'fa-sort-up': sortState === 'ID'
-                                && sortCoefficient === 1,
-                            })}
-                          />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
-                  <th
-                    onClick={() => {
-                      if (sortState === 'Product') {
-                        setSortCoefficient(getSortValue(sortCoefficient));
-
-                        return;
-                      }
-
-                      setSortState('Product');
-                      setSortCoefficient(1);
-                    }}
-                  >
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      Product
-
-                      <a href="#/">
-                        <span className="icon">
-                          <i
-                            data-cy="SortIcon"
-                            className={cn('fas', {
-                              'fa-sort': sortState !== 'Product'
-                              || (sortState === 'Product'
-                                && sortCoefficient === 0),
-                              'fa-sort-down': sortState === 'Product'
-                                && sortCoefficient === -1,
-                              'fa-sort-up': sortState === 'Product'
-                                && sortCoefficient === 1,
-                            })}
-                          />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
-
-                  <th
-                    onClick={() => {
-                      if (sortState === 'Category') {
-                        setSortCoefficient(getSortValue(sortCoefficient));
-
-                        return;
-                      }
-
-                      setSortState('Category');
-                      setSortCoefficient(1);
-                    }}
-                  >
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      Category
-
-                      <a href="#/">
-                        <span className="icon">
-                          <i
-                            data-cy="SortIcon"
-                            className={cn('fas', {
-                              'fa-sort': sortState !== 'Category'
-                              || (sortState === 'Category'
-                                && sortCoefficient === 0),
-                              'fa-sort-down': sortState === 'Category'
-                                && sortCoefficient === -1,
-                              'fa-sort-up': sortState === 'Category'
-                                && sortCoefficient === 1,
-                            })}
-                          />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
-
-                  <th
-                    onClick={() => {
-                      if (sortState === 'User') {
-                        setSortCoefficient(getSortValue(sortCoefficient));
-
-                        return;
-                      }
-
-                      setSortState('User');
-                      setSortCoefficient(1);
-                    }}
-                  >
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      User
-
-                      <a href="#/">
-                        <span className="icon">
-                          <i
-                            data-cy="SortIcon"
-                            className={cn('fas', {
-                              'fa-sort': sortState !== 'User'
-                              || (sortState === 'User'
-                                && sortCoefficient === 0),
-                              'fa-sort-down': sortState === 'User'
-                                && sortCoefficient === -1,
-                              'fa-sort-up': sortState === 'User'
-                                && sortCoefficient === 1,
-                            })}
-                          />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
+                        <a href="#/">
+                          <span className="icon">
+                            <i
+                              data-cy="SortIcon"
+                              className={cn('fas', {
+                                'fa-sort': sortState !== el
+                                || (sortState === el
+                                  && sortCoefficient === 0),
+                                'fa-sort-down': sortState === el
+                                  && sortCoefficient === -1,
+                                'fa-sort-up': sortState === el
+                                  && sortCoefficient === 1,
+                              })}
+                            />
+                          </span>
+                        </a>
+                      </span>
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
