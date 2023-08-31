@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
-import { useState } from 'react';
 import cn from 'classnames';
 
 import usersFromServer from './api/users';
@@ -23,17 +22,32 @@ const products = productsFromServer.map((product) => {
   };
 });
 
-const filterProduct = (sortUser) => {
-  if (!sortUser) {
+const filterProduct = (userFilter, inputState) => {
+  if (!userFilter && !inputState) {
     return products;
   }
 
-  return products.filter(({ userName }) => userName === sortUser);
+  let prods = [...products];
+
+  if (userFilter) {
+    prods = prods.filter(({ userName }) => userName === userFilter);
+  }
+
+  const newInputValue = inputState.trim().toLowerCase();
+
+  if (inputState) {
+    prods = prods.filter(({ productName }) => productName
+      .trim().toLowerCase().includes(newInputValue));
+  }
+
+  return prods;
 };
 
 export const App = () => {
-  const [selectedProducts, setSelectedProducts] = useState(products);
   const [userFilter, setUserFilter] = useState('');
+  const [inputState, setInputState] = useState('');
+
+  const prods = filterProduct(userFilter, inputState);
 
   return (
     <div className="section">
@@ -49,7 +63,6 @@ export const App = () => {
                 data-cy="FilterAllUsers"
                 href="#/"
                 onClick={() => {
-                  setSelectedProducts(products);
                   setUserFilter('');
                 }}
                 className={cn({ 'is-active': !userFilter })}
@@ -63,7 +76,6 @@ export const App = () => {
                   data-cy="FilterUser"
                   href="#/"
                   onClick={() => {
-                    setSelectedProducts(filterProduct(name));
                     setUserFilter(name);
                   }}
                 >
@@ -79,21 +91,26 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={inputState}
+                  onChange={event => setInputState(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    data-cy="ClearButton"
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {inputState.length > 0 && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={() => setInputState('')}
+                    />
+                  </span>
+                )}
+
               </p>
             </div>
 
@@ -151,7 +168,7 @@ export const App = () => {
         </div>
 
         <div className="box table-container">
-          {selectedProducts.length ? (
+          {prods.length ? (
 
             <table
               data-cy="ProductTable"
@@ -210,7 +227,7 @@ export const App = () => {
               </thead>
 
               <tbody>
-                {selectedProducts.map((el) => {
+                {prods.map((el) => {
                   const { id, productName, title, icon, sex, userName } = el;
 
                   return (
@@ -246,4 +263,4 @@ export const App = () => {
       </div>
     </div>
   );
-}
+};
