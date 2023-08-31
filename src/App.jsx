@@ -22,8 +22,8 @@ const products = productsFromServer.map((product) => {
   };
 });
 
-const filterProduct = (userFilter, inputState) => {
-  if (!userFilter && !inputState) {
+const filterProduct = (userFilter, inputState, categoriesList) => {
+  if (!userFilter && !inputState && !categoriesList.length) {
     return products;
   }
 
@@ -40,14 +40,19 @@ const filterProduct = (userFilter, inputState) => {
       .trim().toLowerCase().includes(newInputValue));
   }
 
+  if (categoriesList.length) {
+    prods = prods.filter(({ title }) => categoriesList.includes(title));
+  }
+
   return prods;
 };
 
 export const App = () => {
   const [userFilter, setUserFilter] = useState('');
   const [inputState, setInputState] = useState('');
+  const [categoriesList, setCategoriesList] = useState([]);
 
-  const prods = filterProduct(userFilter, inputState);
+  const prods = filterProduct(userFilter, inputState, categoriesList);
 
   return (
     <div className="section">
@@ -118,41 +123,41 @@ export const App = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
+                className={cn('button', 'is-success', 'mr-6', {
+                  'is-outlined': categoriesList.length,
+                })}
+                onClick={() => setCategoriesList([])}
               >
                 All
               </a>
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 1
-              </a>
+              {categoriesFromServer.map(({ title }) => (
+                <a
+                  data-cy="Category"
+                  className={cn('button', 'mr-2', 'my-1', {
+                    'is-info': categoriesList.includes(title),
+                  })}
+                  href="#/"
+                  onClick={() => {
+                    if (!categoriesList.includes(title)) {
+                      setCategoriesList(prevState => ([
+                        ...prevState,
+                        title,
+                      ]));
+                    } else {
+                      setCategoriesList((prevState) => {
+                        const copy = [...prevState];
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 2
-              </a>
+                        copy.splice(copy.indexOf(title), 1);
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 3
-              </a>
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 4
-              </a>
+                        return copy;
+                      })
+                    }
+                  }}
+                >
+                  {title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -163,6 +168,7 @@ export const App = () => {
                 onClick={() => {
                   setInputState('');
                   setUserFilter('');
+                  setCategoriesList([]);
                 }}
               >
                 Reset all filters
