@@ -47,12 +47,53 @@ const filterProduct = (userFilter, inputState, categoriesList) => {
   return prods;
 };
 
+const sortProducts = (prevProds, sortState, sortCoefficient) => {
+  if (!sortCoefficient) {
+    return prevProds;
+  }
+
+  const copyProds = [...prevProds];
+
+  switch (sortState) {
+    case 'ID': return copyProds.sort((a, b) => (a.id - b.id) * sortCoefficient);
+    case 'Product': return copyProds
+      .sort((a, b) => (a.productName
+        .localCompare(b.productName)) * sortCoefficient);
+    case 'Category': return copyProds
+      .sort((a, b) => (a.title
+        .localCompare(b.title)) * sortCoefficient);
+    case 'User': return copyProds
+      .sort((a, b) => (a.userName
+        .localCompare(b.userName)) * sortCoefficient);
+
+    default: throw new Error('Error');
+  }
+};
+
+const getSortValue = (currentCoeff) => {
+  if (currentCoeff === 0) {
+    return 1;
+  }
+
+  if (currentCoeff === 1) {
+    return -1;
+  }
+
+  return 0;
+};
+
+// const sortedFields = ['ID', 'Product', 'Category', 'User'];
+
 export const App = () => {
   const [userFilter, setUserFilter] = useState('');
   const [inputState, setInputState] = useState('');
   const [categoriesList, setCategoriesList] = useState([]);
+  const [sortState, setSortState] = useState('');
+  const [sortCoefficient, setSortCoefficient] = useState(0);
 
-  const prods = filterProduct(userFilter, inputState, categoriesList);
+  let prods = filterProduct(userFilter, inputState, categoriesList);
+
+  prods = sortProducts(prods, sortState, sortCoefficient);
 
   return (
     <div className="section">
@@ -75,8 +116,9 @@ export const App = () => {
                 All
               </a>
 
-              {usersFromServer.map(({ name }) => (
+              {usersFromServer.map(({ id, name }) => (
                 <a
+                  key={id}
                   className={cn({ 'is-active': name === userFilter })}
                   data-cy="FilterUser"
                   href="#/"
@@ -131,8 +173,9 @@ export const App = () => {
                 All
               </a>
 
-              {categoriesFromServer.map(({ title }) => (
+              {categoriesFromServer.map(({ id, title }) => (
                 <a
+                  key={id}
                   data-cy="Category"
                   className={cn('button', 'mr-2', 'my-1', {
                     'is-info': categoriesList.includes(title),
@@ -151,7 +194,7 @@ export const App = () => {
                         copy.splice(copy.indexOf(title), 1);
 
                         return copy;
-                      })
+                      });
                     }
                   }}
                 >
@@ -169,6 +212,8 @@ export const App = () => {
                   setInputState('');
                   setUserFilter('');
                   setCategoriesList([]);
+                  setSortCoefficient(0);
+                  setSortState('');
                 }}
               >
                 Reset all filters
@@ -179,56 +224,142 @@ export const App = () => {
 
         <div className="box table-container">
           {prods.length ? (
-
             <table
               data-cy="ProductTable"
               className="table is-striped is-narrow is-fullwidth"
             >
               <thead>
                 <tr>
-                  <th>
+                  <th
+                    onClick={() => {
+                      if (sortState === 'ID') {
+                        setSortCoefficient(getSortValue(sortCoefficient));
+
+                        return;
+                      }
+
+                      setSortState('ID');
+                      setSortCoefficient(1);
+                    }}
+                  >
                     <span className="is-flex is-flex-wrap-nowrap">
                       ID
 
                       <a href="#/">
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort" />
+                          <i
+                            data-cy="SortIcon"
+                            className={cn('fas', {
+                              'fa-sort': sortState !== 'ID'
+                              || (sortState === 'ID'
+                                && sortCoefficient === 0),
+                              'fa-sort-down': sortState === 'ID'
+                                && sortCoefficient === -1,
+                              'fa-sort-up': sortState === 'ID'
+                                && sortCoefficient === 1,
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
                   </th>
+                  <th
+                    onClick={() => {
+                      if (sortState === 'Product') {
+                        setSortCoefficient(getSortValue(sortCoefficient));
 
-                  <th>
+                        return;
+                      }
+
+                      setSortState('Product');
+                      setSortCoefficient(1);
+                    }}
+                  >
                     <span className="is-flex is-flex-wrap-nowrap">
                       Product
 
                       <a href="#/">
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort-down" />
+                          <i
+                            data-cy="SortIcon"
+                            className={cn('fas', {
+                              'fa-sort': sortState !== 'Product'
+                              || (sortState === 'Product'
+                                && sortCoefficient === 0),
+                              'fa-sort-down': sortState === 'Product'
+                                && sortCoefficient === -1,
+                              'fa-sort-up': sortState === 'Product'
+                                && sortCoefficient === 1,
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
                   </th>
 
-                  <th>
+                  <th
+                    onClick={() => {
+                      if (sortState === 'Category') {
+                        setSortCoefficient(getSortValue(sortCoefficient));
+
+                        return;
+                      }
+
+                      setSortState('Category');
+                      setSortCoefficient(1);
+                    }}
+                  >
                     <span className="is-flex is-flex-wrap-nowrap">
                       Category
 
                       <a href="#/">
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort-up" />
+                          <i
+                            data-cy="SortIcon"
+                            className={cn('fas', {
+                              'fa-sort': sortState !== 'Category'
+                              || (sortState === 'Category'
+                                && sortCoefficient === 0),
+                              'fa-sort-down': sortState === 'Category'
+                                && sortCoefficient === -1,
+                              'fa-sort-up': sortState === 'Category'
+                                && sortCoefficient === 1,
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
                   </th>
 
-                  <th>
+                  <th
+                    onClick={() => {
+                      if (sortState === 'User') {
+                        setSortCoefficient(getSortValue(sortCoefficient));
+
+                        return;
+                      }
+
+                      setSortState('User');
+                      setSortCoefficient(1);
+                    }}
+                  >
                     <span className="is-flex is-flex-wrap-nowrap">
                       User
 
                       <a href="#/">
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort" />
+                          <i
+                            data-cy="SortIcon"
+                            className={cn('fas', {
+                              'fa-sort': sortState !== 'User'
+                              || (sortState === 'User'
+                                && sortCoefficient === 0),
+                              'fa-sort-down': sortState === 'User'
+                                && sortCoefficient === -1,
+                              'fa-sort-up': sortState === 'User'
+                                && sortCoefficient === 1,
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
@@ -241,7 +372,7 @@ export const App = () => {
                   const { id, productName, title, icon, sex, userName } = el;
 
                   return (
-                    <tr data-cy="Product">
+                    <tr data-cy="Product" key={id}>
                       <td className="has-text-weight-bold" data-cy="ProductId">
                         {id}
                       </td>
